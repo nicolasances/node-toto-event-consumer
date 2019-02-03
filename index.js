@@ -30,7 +30,7 @@ class TotoEventConsumer {
     });
 
     // Start the Kafka consumer
-    var options = {groupId: group}
+    var options = {groupId: microservice}
 
     this.consumer = new Consumer(client, [
       {topic: topic}
