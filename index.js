@@ -45,7 +45,7 @@ class TotoEventConsumer {
     /**
      * Reacts to receiving a message on the supermarket-categorization topic
      */
-    consumer.on('message', onMessage);
+    this.consumer.on('message', onMessage);
 
   }
 
