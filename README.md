@@ -6,5 +6,7 @@ When including this through `require()`, a new `TotoEventConsumer` instance will
 
 Typical usage:
 
-`var TotoEventConsumer = require('toto-event-consumer');`
-`var eventConsumer = new TotoEventConsumer('training-react-session', 'trainingSessionCreated', (message) => {});`
+```
+var TotoEventConsumer = require('toto-event-consumer');
+var eventConsumer = new TotoEventConsumer('training-react-session', 'trainingSessionCreated', (message) => {});
+```
