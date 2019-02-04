@@ -35,7 +35,7 @@ class TotoEventConsumer {
       protocol: ['roundrobin'],
       fromOffset: 'latest',
       commitOffsetsOnFirstJoin: true,
-      outOfRangeOffset: 'earliest'
+      outOfRangeOffset: 'latest'
     }, topic);
 
     // React to error messages
