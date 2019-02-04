@@ -1,8 +1,7 @@
 var kafka = require('kafka-node');
 var moment = require('moment-timezone');
 
-var Consumer = kafka.Consumer;
-var client = new kafka.KafkaClient({kafkaHost: 'kafka:9092', connectTimeout: 3000, requestTimeout: 6000});
+var ConsumerGroup = kafka.ConsumerGroup;
 
 
 /**
@@ -29,15 +28,27 @@ class TotoEventConsumer {
       role: 'consumer'
     });
 
-    // Start the Kafka consumer
-    var options = {groupId: microservice}
+    // Create the Kafka Consumer Group
+    this.consumer = new ConsumerGroup({
+      kafkaHost: 'kafka:9092',
+      groupId: microservice,
+      protocol: ['roundrobin'],
+      fromOffset: 'latest',
+      commitOffsetsOnFirstJoin: true,
+      outOfRangeOffset: 'earliest'
+    }, topic);
 
-    this.consumer = new Consumer(client, [
-      {topic: topic}
-    ], options);
-
+    // React to error messages
     this.consumer.on('error', (error) => {
       console.log('Received an error from Kafka Consumer:');
+      console.log(error);
+      console.log('But I am not stopping!!');
+    })
+
+    // React to the offsetOutOfRange
+    // This kind of error occurs when for example Kafka deletes the logs (based on the retention policy)
+    // and the offset refers to deleted logs
+    this.consumer.on('offsetOutOfRange', (error) => {
       console.log(error);
       console.log('But I am not stopping!!');
     })
