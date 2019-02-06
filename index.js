@@ -42,15 +42,13 @@ class TotoEventConsumer {
     this.consumer.on('error', (error) => {
       console.log('Received an error from Kafka Consumer:');
       console.log(error);
-      console.log('But I am not stopping!!');
     })
 
     // React to the offsetOutOfRange
     // This kind of error occurs when for example Kafka deletes the logs (based on the retention policy)
     // and the offset refers to deleted logs
     this.consumer.on('offsetOutOfRange', (error) => {
-      console.log(error);
-      console.log('But I am not stopping!!');
+      console.log('Error: OffsetOutOfRange');
     })
 
     /**
