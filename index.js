@@ -1,5 +1,6 @@
 var kafka = require('kafka-node');
 var moment = require('moment-timezone');
+var logger = require('toto-logger');
 
 var ConsumerGroup = kafka.ConsumerGroup;
 
@@ -54,7 +55,17 @@ class TotoEventConsumer {
     /**
      * Reacts to receiving a message on the supermarket-categorization topic
      */
-    this.consumer.on('message', onMessage);
+    this.consumer.on('message', (message) => {
+
+      // 0. Parse the message to get the correlation id
+      let eventData = JSON.parse(message.value);
+
+      // 1. Log
+      if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic);
+
+      // 2. Provide event to the callback
+      onMessage(eventData);
+    });
 
   }
 
