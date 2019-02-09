@@ -35,7 +35,7 @@ class TotoEventConsumer {
       groupId: microservice,
       protocol: ['roundrobin'],
       fromOffset: 'latest',
-      commitOffsetsOnFirstJoin: true,
+      commitOffsetsOnFirstJoin: false,
       outOfRangeOffset: 'latest'
     }, topic);
 
