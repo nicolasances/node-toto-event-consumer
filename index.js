@@ -52,7 +52,8 @@ class TotoEventConsumer {
       console.log('Error: OffsetOutOfRange for topics ' + this.topics[0].topicName);
 
       var offset = new kafka.Offset(client);
-      offset.fetch([{ topic: this.topics[0].topicName, partition: 0, time: -1, maxNum: 1 }], function (err, data) {
+
+      offset.fetch([{ topic: this.topics[0].topicName, partition: 0, time: -1, maxNum: 1 }], (err, data) => {
 
         let currentOff = data[this.topics[0].topicName]['0'][0];
 
