@@ -50,6 +50,7 @@ class TotoEventConsumer {
     // and the offset refers to deleted logs
     this.consumer.on('offsetOutOfRange', (error) => {
       console.log('Error: OffsetOutOfRange');
+      this.consumer.setOffset(this.topics[0].topicName, 0, 'latest')
     })
 
     /**
