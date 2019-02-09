@@ -8,7 +8,7 @@ Typical usage:
 
 ```
 var TotoEventConsumer = require('toto-event-consumer');
-var eventConsumer = new TotoEventConsumer('training-react-session', 'trainingSessionCreated', (event) => {});
+var eventConsumer = new TotoEventConsumer(<microservice name e.g. 'training-session'>, <topic name>, (event) => {});
 ```
 
 **NOTE!** that the `event` that is being passed in the callback **has already been parsed and is in JSON format**!
