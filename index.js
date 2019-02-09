@@ -57,14 +57,27 @@ class TotoEventConsumer {
      */
     this.consumer.on('message', (message) => {
 
-      // 0. Parse the message to get the correlation id
-      let eventData = JSON.parse(message.value);
+      if (message == null || message.value == null) {
+        console.log("Error: message or message value was null..");
+        console.log(message);
+      };
 
-      // 1. Log
-      if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic);
+      try {
 
-      // 2. Provide event to the callback
-      onMessage(eventData);
+        // 0. Parse the message to get the correlation id
+        let eventData = JSON.parse(message.value);
+
+        // 1. Log
+        if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic);
+
+        // 2. Provide event to the callback
+        onMessage(eventData);
+
+      } catch (e) {
+
+        console.log(e);
+
+      }
     });
 
   }
