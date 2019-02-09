@@ -1,4 +1,7 @@
 
+var moment = require('moment-timezone');
+
+
 class Logger {
 
   /**
@@ -6,7 +9,9 @@ class Logger {
    */
   apiIn(correlationId, method, path) {
 
-    console.log('[' + correlationId + '] - [api-in] - [info] - Received HTTP call ' + method + ' ' + path);
+    let ts = moment().tz('Europe/Rome').format('YYYYMMDDHHmmssSSSSS');
+
+    console.log('[' + ts + '] - [' + correlationId + '] - [api-in] - [info] - Received HTTP call ' + method + ' ' + path);
 
   }
 
@@ -15,7 +20,9 @@ class Logger {
    */
   apiOut(correlationId, microservice, method, path) {
 
-    console.log('[' + correlationId + '] - [api-out:' + microservice + '] - [info] - Performing HTTP call ' + method + ' ' + path);
+    let ts = moment().tz('Europe/Rome').format('YYYYMMDDHHmmssSSSSS');
+
+    console.log('[' + ts + '] - [' + correlationId + '] - [api-out:' + microservice + '] - [info] - Performing HTTP call ' + method + ' ' + path);
 
   }
 
@@ -24,7 +31,9 @@ class Logger {
   */
   eventIn(correlationId, topic) {
 
-    console.log('[' + correlationId + '] - [event-in] - [info] - Received event from topic ' + topic);
+    let ts = moment().tz('Europe/Rome').format('YYYYMMDDHHmmssSSSSS');
+
+    console.log('[' + ts + '] - [' + correlationId + '] - [event-in] - [info] - Received event from topic ' + topic);
 
   }
 
@@ -33,7 +42,9 @@ class Logger {
   */
   eventOut(correlationId, topic) {
 
-    console.log('[' + correlationId + '] - [event-out] - [info] - Sending event to topic ' + topic);
+    let ts = moment().tz('Europe/Rome').format('YYYYMMDDHHmmssSSSSS');
+
+    console.log('[' + ts + '] - [' + correlationId + '] - [event-out] - [info] - Sending event to topic ' + topic);
 
   }
 
@@ -43,7 +54,9 @@ class Logger {
    */
   compute(correlationId, message, logLevel) {
 
-    console.log('[' + correlationId + '] - [compute] - [' + logLevel + '] - ' + message);
+    let ts = moment().tz('Europe/Rome').format('YYYYMMDDHHmmssSSSSS');
+
+    console.log('[' + ts + '] - [' + correlationId + '] - [compute] - [' + logLevel + '] - ' + message);
 
   }
 }
