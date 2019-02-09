@@ -2,7 +2,14 @@ var kafka = require('kafka-node');
 var moment = require('moment-timezone');
 var logger = require('toto-logger');
 
-var ConsumerGroup = kafka.ConsumerGroup;
+var client = new kafka.KafkaClient({
+  kafkaHost: 'kafka:9092',
+  connectTimeout: 10000,
+  requestTimeout: 6000
+});
+
+var Consumer = kafka.Consumer;
+
 
 
 /**
@@ -30,14 +37,7 @@ class TotoEventConsumer {
     });
 
     // Create the Kafka Consumer Group
-    this.consumer = new ConsumerGroup({
-      kafkaHost: 'kafka:9092',
-      groupId: microservice,
-      protocol: ['roundrobin'],
-      fromOffset: 'latest',
-      commitOffsetsOnFirstJoin: false,
-      outOfRangeOffset: 'latest'
-    }, topic);
+    this.consumer = new Consumer(client, [{topic: topic, offset: 'latest', partition: 0}], {groupId: microservice, autoCommit: true, fetchMaxBytes: 100000000, fromOffset: true});
 
     // React to error messages
     this.consumer.on('error', (error) => {
