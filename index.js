@@ -49,9 +49,19 @@ class TotoEventConsumer {
     // This kind of error occurs when for example Kafka deletes the logs (based on the retention policy)
     // and the offset refers to deleted logs
     this.consumer.on('offsetOutOfRange', (error) => {
-      console.log('Error: OffsetOutOfRange');
-      this.consumer.setOffset(this.topics[0].topicName, 0, 'latest');
-      this.consumer.commit((err, data) => {});
+      console.log('Error: OffsetOutOfRange for topics ' + this.topics[0].topicName);
+
+      var offset = new kafka.Offset(client);
+      offset.fetch([{ topic: this.topics[0].topicName, partition: 0, time: -1, maxNum: 1 }], function (err, data) {
+
+        let currentOff = data[this.topics[0].topicName]['0'][0];
+
+        this.consumer.pause();
+        this.consumer.setOffset(this.topics[0].topicName, 0, currentOff);
+        this.consumer.commit((err, data) => {if (err) console.log(err);});
+        this.consumer.resume();
+
+      });
     })
 
     /**
