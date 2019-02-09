@@ -57,8 +57,6 @@ class TotoEventConsumer {
      */
     this.consumer.on('message', (message) => {
 
-      console.log(message);
-
       // 0. Parse the message to get the correlation id
       let eventData = JSON.parse(message.value);
 
