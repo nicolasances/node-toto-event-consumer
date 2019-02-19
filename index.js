@@ -68,7 +68,7 @@ class TotoEventConsumer {
         let eventData = JSON.parse(message.value);
 
         // 1. Log
-        if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic);
+        if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic, eventData.msgId);
 
         // 2. Provide event to the callback
         onMessage(eventData);

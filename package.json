@@ -11,6 +11,6 @@
   "dependencies": {
     "kafka-node": "^4.0.0",
     "moment-timezone": "^0.5.23",
-    "toto-logger": "^3.0.0"
+    "toto-logger": "^4.0.0"
   }
 }
