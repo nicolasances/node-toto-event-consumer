@@ -28,14 +28,16 @@ class TotoEventConsumer {
         this.topics.push({
           topicName: topic[i],
           microservice: microservice,
-          role: 'consumer'
+          role: 'consumer',
+          onMessage: onMessage[i]
         });
       }
     }
     else this.topics.push({
       topicName: topic,
       microservice: microservice,
-      role: 'consumer'
+      role: 'consumer',
+      onMessage: onMessage
     });
 
     // Create the Kafka Consumer Group
@@ -63,6 +65,16 @@ class TotoEventConsumer {
 
     /**
      * Reacts to receiving a message on the supermarket-categorization topic
+     * Structure of "message":
+     * {
+        topic: 'expensesUploadConfirmed',
+        value: '...',
+        offset: 0,
+        partition: 0,
+        highWaterOffset: 1,
+        key: null,
+        timestamp: 2019-05-25T11:47:25.861Z
+      }
      */
     this.consumer.on('message', (message) => {
 
@@ -72,7 +84,6 @@ class TotoEventConsumer {
       };
 
       try {
-        console.log(message);
 
         // 0. Parse the message to get the correlation id
         let eventData = JSON.parse(message.value);
@@ -80,8 +91,15 @@ class TotoEventConsumer {
         // 1. Log
         if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic, eventData.msgId);
 
+        // 2. Find the right topic and messge handler
+        if (Array.isArray(topic)) {
+          for (var i = 0; i < topic.length; i++) {
+            // 2. Provide event to the callback
+            if (topic[i] == message.topic) onMessage[i](eventData);
+          }
+        }
         // 2. Provide event to the callback
-        onMessage(eventData);
+        else onMessage(eventData);
 
       } catch (e) {
 
