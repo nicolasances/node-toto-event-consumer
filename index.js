@@ -14,8 +14,8 @@ class TotoEventConsumer {
    * Constrcutor.
    * Please provide:
    * - microservice   : the name of the microservice (e.g. expenses)
-   * - topics         : the name of the topic
-   * - onMessage      : the callback to be called (message) => {}
+   * - topic          : the name of the topic (if single) or an array of topics
+   * - onMessage      : the callback to be called (message) => {} or an array of callbacks (same index as the topics array)
    */
   constructor(microservice, topic, onMessage) {
 
@@ -23,7 +23,16 @@ class TotoEventConsumer {
     this.topics = [];
 
     // Add the topic
-    this.topics.push({
+    if (Array.isArray(topic)) {
+      for (var i = 0; i < topic.length; i++) {
+        this.topics.push({
+          topicName: topic[i],
+          microservice: microservice,
+          role: 'consumer'
+        });
+      }
+    }
+    else this.topics.push({
       topicName: topic,
       microservice: microservice,
       role: 'consumer'
@@ -63,6 +72,7 @@ class TotoEventConsumer {
       };
 
       try {
+        console.log(message);
 
         // 0. Parse the message to get the correlation id
         let eventData = JSON.parse(message.value);
