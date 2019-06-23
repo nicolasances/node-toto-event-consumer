@@ -91,11 +91,14 @@ class TotoEventConsumer {
         // Find the right topic and messge handler
         if (Array.isArray(topic)) {
           for (var i = 0; i < topic.length; i++) {
-            // 1. Log
-            if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic[i], eventData.msgId);
 
-            // 2. Provide event to the callback
-            if (topic[i] == message.topic) onMessage[i](eventData);
+            if (topic[i] == message.topic) {
+              // 1. Log
+              if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic[i], eventData.msgId);
+
+              // 2. Provide event to the callback
+              onMessage[i](eventData);
+            }
           }
         }
         // Provide event to the callback
