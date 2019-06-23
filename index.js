@@ -88,18 +88,24 @@ class TotoEventConsumer {
         // 0. Parse the message to get the correlation id
         let eventData = JSON.parse(message.value);
 
-        // 1. Log
-        if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic, eventData.msgId);
-
-        // 2. Find the right topic and messge handler
+        // Find the right topic and messge handler
         if (Array.isArray(topic)) {
           for (var i = 0; i < topic.length; i++) {
+            // 1. Log
+            if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic[i], eventData.msgId);
+
             // 2. Provide event to the callback
             if (topic[i] == message.topic) onMessage[i](eventData);
           }
         }
-        // 2. Provide event to the callback
-        else onMessage(eventData);
+        // Provide event to the callback
+        else {
+          // 1. Log
+          if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic, eventData.msgId);
+
+          // 2. Provide event to the callback
+          onMessage(eventData);
+        }
 
       } catch (e) {
 
