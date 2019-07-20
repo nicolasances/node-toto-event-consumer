@@ -1,9 +1,11 @@
-var kafka = require('kafka-node');
+const {PubSub} = require('@google-cloud/pubsub');
 var moment = require('moment-timezone');
 var logger = require('toto-logger');
 
-var ConsumerGroup = kafka.ConsumerGroup;
+var SubscriptionCreator = require('./util/PubSubSubscriptionCreator');
 
+const pubsub = new PubSub();
+const subscriptionCreator = new SubscriptionCreator(pubsub);
 
 /**
  * Facade to the Toto event bus publishing functionalities
@@ -22,49 +24,9 @@ class TotoEventConsumer {
     // This is the list of topics this consumer is subscribing to
     this.topics = [];
 
-    // Add the topic
-    if (Array.isArray(topic)) {
-      for (var i = 0; i < topic.length; i++) {
-        this.topics.push({
-          topicName: topic[i],
-          microservice: microservice,
-          role: 'consumer',
-          onMessage: onMessage[i]
-        });
-      }
-    }
-    else this.topics.push({
-      topicName: topic,
-      microservice: microservice,
-      role: 'consumer',
-      onMessage: onMessage
-    });
-
-    // Create the Kafka Consumer Group
-    this.consumer = new ConsumerGroup({
-      kafkaHost: 'kafka:9092',
-      groupId: microservice,
-      protocol: ['roundrobin'],
-      fromOffset: 'latest',
-      commitOffsetsOnFirstJoin: true,
-      outOfRangeOffset: 'latest'
-    }, topic);
-
-    // React to error messages
-    this.consumer.on('error', (error) => {
-      console.log('Received an error from Kafka Consumer:');
-      console.log(error);
-    })
-
-    // React to the offsetOutOfRange
-    // This kind of error occurs when for example Kafka deletes the logs (based on the retention policy)
-    // and the offset refers to deleted logs
-    this.consumer.on('offsetOutOfRange', (error) => {
-      console.log('Error: OffsetOutOfRange');
-    })
-
     /**
-     * Reacts to receiving a message on the supermarket-categorization topic
+     * This method prepares the message before serving it to the handler in the 
+     * subscribing microservice
      * Structure of "message":
      * {
         topic: 'expensesUploadConfirmed',
@@ -75,47 +37,67 @@ class TotoEventConsumer {
         key: null,
         timestamp: 2019-05-25T11:47:25.861Z
       }
+     * @param {message} message 
      */
-    this.consumer.on('message', (message) => {
+    var prepareMessage = (message) => {
 
-      if (message == null || message.value == null) {
-        console.log("Error: message or message value was null..");
-        console.log(message);
-      };
+      // 1. Get the subscription from the message 
+      let subscriptionFullName = message._subscriber._subscription.name;
+      let subscriptionFullNameComp = subscriptionFullName.split('/');
+      let subscriptionName = subscriptionFullNameComp[subscriptionFullNameComp.length - 1];
 
-      try {
+      // 2. Parse the message
+      let eventData = JSON.parse(message.data);
 
-        // 0. Parse the message to get the correlation id
-        let eventData = JSON.parse(message.value);
+      // 3. Find the subscription
+      for (var i = 0; i < this.topics.length; i++) {
+        if (this.topics[i].subscriptionName === subscriptionName) {
 
-        // Find the right topic and messge handler
-        if (Array.isArray(topic)) {
-          for (var i = 0; i < topic.length; i++) {
+          // 3.1. Log
+          if (eventData.correlationId) logger.eventIn(eventData.correlationId, this.topics[i].topicName, eventData.msgId);
 
-            if (topic[i] == message.topic) {
-              // 1. Log
-              if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic[i], eventData.msgId);
+          // 3.2. Provide event to the callback
+          this.topics[i].onMessage(eventData);
 
-              // 2. Provide event to the callback
-              onMessage[i](eventData);
-            }
-          }
+          // 3.3. Ack 
+          message.ack();
+          
         }
-        // Provide event to the callback
-        else {
-          // 1. Log
-          if (eventData.correlationId) logger.eventIn(eventData.correlationId, topic, eventData.msgId);
-
-          // 2. Provide event to the callback
-          onMessage(eventData);
-        }
-
-      } catch (e) {
-
-        console.log(e);
-
       }
+
+    }
+
+    // Add the topic
+    if (Array.isArray(topic)) {
+      for (var i = 0; i < topic.length; i++) {
+        this.topics.push({
+          topicName: topic[i],
+          microservice: microservice,
+          role: 'consumer',
+          onMessage: onMessage[i],
+          // The subscription is made as a concatenation of the topic and the microservice name 
+          subscriptionName: topic[i] + '-' + microservice
+        });
+      }
+    }
+    else this.topics.push({
+      topicName: topic,
+      microservice: microservice,
+      role: 'consumer',
+      onMessage: onMessage,
+      // The subscription is made as a concatenation of the topic and the microservice name 
+      subscriptionName: topic + '-' + microservice
     });
+
+    // Create the Subscription(s) based on how many topics you're listening to
+    for (var i = 0; i < this.topics.length; i++) {
+
+      let top = this.topics[i];
+
+      // Create the subscription => subscribe to the topic
+      subscriptionCreator.subscribe(top.topicName, top.subscriptionName, prepareMessage);
+      
+    }
 
   }
 
