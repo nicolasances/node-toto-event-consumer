@@ -4,7 +4,7 @@ var logger = require('toto-logger');
 
 var SubscriptionCreator = require('./util/PubSubSubscriptionCreator');
 
-const pubsub = new PubSub();
+const pubsub = new PubSub({projectId: 'toto-events-' + process.env.TOTO_ENV});
 const subscriptionCreator = new SubscriptionCreator(pubsub);
 
 /**

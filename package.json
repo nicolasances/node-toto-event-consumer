@@ -1,6 +1,6 @@
 {
   "name": "toto-event-consumer",
-  "version": "6.0.0",
+  "version": "6.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
